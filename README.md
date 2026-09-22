@@ -91,40 +91,9 @@ A Python notebook that:
 
 ## Dashboards
 
-Built with **Databricks AI/BI (Lakeview)** — two interactive dashboards with a combined 4 pages:
+Built with **Databricks AI/BI (Lakeview)** — interactive dashboard with heatmaps visualizing service gaps:
 
-### Dashboard 1: NYC Rodent Activity Dashboard (`dashboards/NYC_Rodent_Activity_Dashboard.lvdash.json`)
-
-**Page 1 - Overview**
-- KPI counters: Total rat sightings, restaurant inspections, rodent violations, restaurants with rodent violations
-- Bar charts by borough: Rat sightings, rodent violations, inspections, restaurants with violations
-- ZIP code detail table with **Rodent Index Score** (composite 0-100):
-  - Rat sightings: 40%
-  - Rodent violations: 30%
-  - Signs + conditions: 20%
-  - Restaurants with violations: 10%
-- Borough and ZIP code filters
-
-**Page 2 - Service Gap Index**
-
-Implements the Service Gap Index design comparing rats found vs rats reported:
-- **Rats found** = distinct restaurants with 04K violation / distinct restaurants inspected
-- **Rats reported** = distinct rat-sighting locations per 10,000 residents
-- **Gap Index** = rats-found percentile - rats-reported percentile
-- ZIPs with <10 inspected restaurants get no score
-- **Enough-data flag** requires >=10 inspected restaurants AND >=1,000 residents
-- KPIs, borough bar charts, and detailed ZIP-level table
-- Positive gap = inspectors finding rats residents aren't reporting
-- Negative gap = residents reporting what inspections miss (common in residential areas)
-
-**Page 3 - Diagnostic Analysis**
-- Inflation factor by borough (inspection intensity effects)
-- Closure rate (30+ day) by borough
-- Inspections per restaurant by borough
-- Rodent violations per inspection by borough
-- Scatter plots: inspections vs violation rows, inspection intensity vs rats found rate
-
-### Dashboard 2: NYC Rodent Resolution Analysis (`dashboards/NYC_Rodent_Resolution_Analysis.lvdash.json`)
+### NYC Rodent Resolution Analysis Dashboard (`dashboards/NYC_Rodent_Resolution_Analysis.lvdash.json`)
 
 **Page 1 - Rodent Dashboards**
 - Per-ZIP rodent analysis detail table (sightings, inspections, 04K violations, percentiles, underreporting scores)
@@ -176,7 +145,6 @@ NYC-Rodent-Resolution-Analysis/
 │   ├── 04_resolution_time_hours.sql
 │   └── 05_distinct_restaurants.sql
 └── dashboards/
-    ├── NYC_Rodent_Activity_Dashboard.lvdash.json
     └── NYC_Rodent_Resolution_Analysis.lvdash.json
 ```
 
