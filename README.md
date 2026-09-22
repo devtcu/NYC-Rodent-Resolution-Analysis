@@ -5,6 +5,8 @@
 >
 > **Built for the Databricks AI Hackathon + Networking NYC** (September 18-20, 2026)  
 > Hosted by Databricks, Q Tech Incubator @ Queens College, and WAGMI-Connect
+>
+> - Kyame Israel, Richard Lin, Devansh Matham
 
 ---
 
