@@ -1,0 +1,487 @@
+{
+  "datasets": [
+    {
+      "name": "final_tables",
+      "displayName": "NYC Rodent Final Tables",
+      "queryLines": [
+        "WITH raw AS (\n",
+        "  SELECT\n",
+        "    *\n",
+        "  FROM\n",
+        "    read_files(\n",
+        "      '/Workspace/Shared/rat_investigation/Final_Tables/',\n",
+        "      format => 'csv',\n",
+        "      header => true,\n",
+        "      schemaEvolutionMode => 'none',\n",
+        "      pathGlobFilter => 'Final.csv'\n",
+        "    )\n",
+        "),\n",
+        "zip_coords AS (\n",
+        "  SELECT\n",
+        "    TRY_CAST(zip_code AS INT) AS zipcode,\n",
+        "    AVG(latitude) AS avg_lat,\n",
+        "    AVG(longitude) AS avg_lng\n",
+        "  FROM\n",
+        "    workspace.default.rat_sightings_normalized\n",
+        "  GROUP BY\n",
+        "    TRY_CAST(zip_code AS INT)\n",
+        ")\n",
+        "SELECT\n",
+        "  TRY_CAST(r.zipcode AS INT) AS zipcode,\n",
+        "  TRY_CAST(total_rat_sightings AS DOUBLE) AS total_rat_sightings,\n",
+        "  TRY_CAST(mature_rat_sightings AS DOUBLE) AS mature_rat_sightings,\n",
+        "  TRY_CAST(closed_rat_sightings AS DOUBLE) AS closed_rat_sightings,\n",
+        "  TRY_CAST(median_resolution_days AS DOUBLE) AS median_resolution_days,\n",
+        "  TRY_CAST(average_resolution_days AS DOUBLE) AS average_resolution_days,\n",
+        "  TRY_CAST(avg_p90_resolution_days AS DOUBLE) AS avg_p90_resolution_days,\n",
+        "  TRY_CAST(resolved_within_30_days AS DOUBLE) AS resolved_within_30_days,\n",
+        "  TRY_CAST(not_resolved_within_30_days AS DOUBLE) AS not_resolved_within_30_days,\n",
+        "  TRY_CAST(avg_percent_unresolved_within_30_days AS DOUBLE) AS avg_percent_unresolved_within_30_days,\n",
+        "  TRY_CAST(represented_inspections AS DOUBLE) AS represented_inspections,\n",
+        "  TRY_CAST(inspected_restaurants AS DOUBLE) AS inspected_restaurants,\n",
+        "  TRY_CAST(inspections_with_04k AS DOUBLE) AS inspections_with_04k,\n",
+        "  TRY_CAST(percent_inspections_with_04k AS DOUBLE) AS percent_inspections_with_04k,\n",
+        "  TRY_CAST(complaint_percentile AS DOUBLE) AS complaint_percentile,\n",
+        "  TRY_CAST(inspection_evidence_percentile AS DOUBLE) AS inspection_evidence_percentile,\n",
+        "  TRY_CAST(potential_underreporting_score AS DOUBLE) AS potential_underreporting_score,\n",
+        "  CASE\n",
+        "    WHEN interpretation IS NOT NULL THEN interpretation\n",
+        "    WHEN\n",
+        "      potential_underreporting_score IS NOT NULL\n",
+        "      AND TRY_CAST(potential_underreporting_score AS DOUBLE) IS NULL\n",
+        "    THEN\n",
+        "      potential_underreporting_score\n",
+        "    ELSE NULL\n",
+        "  END AS interpretation,\n",
+        "  zc.avg_lat,\n",
+        "  zc.avg_lng\n",
+        "FROM\n",
+        "  raw r\n",
+        "LEFT JOIN zip_coords zc ON TRY_CAST(r.zipcode AS INT) = zc.zipcode"
+      ]
+    },
+    {
+      "name": "final_coords",
+      "displayName": "Final Tables with Coordinates",
+      "queryLines": [
+        "WITH raw AS (\n",
+        "  SELECT\n",
+        "    *\n",
+        "  FROM\n",
+        "    read_files(\n",
+        "      '/Workspace/Shared/rat_investigation/Final_Tables/',\n",
+        "      format => 'csv',\n",
+        "      header => true,\n",
+        "      schemaEvolutionMode => 'none',\n",
+        "      pathGlobFilter => 'Final.csv'\n",
+        "    )\n",
+        "),\n",
+        "zip_coords AS (\n",
+        "  SELECT\n",
+        "    TRY_CAST(zip_code AS INT) AS zipcode,\n",
+        "    AVG(latitude) AS avg_lat,\n",
+        "    AVG(longitude) AS avg_lng\n",
+        "  FROM\n",
+        "    workspace.default.rat_sightings_normalized\n",
+        "  GROUP BY\n",
+        "    TRY_CAST(zip_code AS INT)\n",
+        ")\n",
+        "SELECT\n",
+        "  TRY_CAST(r.zipcode AS INT) AS zipcode,\n",
+        "  TRY_CAST(r.avg_percent_unresolved_within_30_days AS DOUBLE) AS avg_pct_unresolved,\n",
+        "  TRY_CAST(r.potential_underreporting_score AS DOUBLE) AS underreporting_score,\n",
+        "  ABS(TRY_CAST(r.potential_underreporting_score AS DOUBLE)) AS severity_score,\n",
+        "  CASE\n",
+        "    WHEN r.interpretation IS NOT NULL THEN r.interpretation\n",
+        "    ELSE NULL\n",
+        "  END AS interpretation,\n",
+        "  zc.avg_lat,\n",
+        "  zc.avg_lng\n",
+        "FROM\n",
+        "  raw r\n",
+        "    LEFT JOIN zip_coords zc\n",
+        "      ON TRY_CAST(r.zipcode AS INT) = zc.zipcode"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "f8eb98d1",
+      "displayName": "Rodent Dashboards",
+      "layout": [
+        {
+          "widget": {
+            "name": "final_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "final_tables",
+                  "fields": [
+                    {
+                      "name": "zipcode",
+                      "expression": "`zipcode`"
+                    },
+                    {
+                      "name": "total_rat_sightings",
+                      "expression": "`total_rat_sightings`"
+                    },
+                    {
+                      "name": "inspected_restaurants",
+                      "expression": "`inspected_restaurants`"
+                    },
+                    {
+                      "name": "inspections_with_04k",
+                      "expression": "`inspections_with_04k`"
+                    },
+                    {
+                      "name": "complaint_percentile",
+                      "expression": "`complaint_percentile`"
+                    },
+                    {
+                      "name": "inspection_evidence_percentile",
+                      "expression": "`inspection_evidence_percentile`"
+                    },
+                    {
+                      "name": "potential_underreporting_score",
+                      "expression": "`potential_underreporting_score`"
+                    },
+                    {
+                      "name": "interpretation",
+                      "expression": "`interpretation`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Per-ZIP Rodent Analysis Detail",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "zipcode",
+                    "useForSearch": true
+                  },
+                  {
+                    "fieldName": "total_rat_sightings"
+                  },
+                  {
+                    "fieldName": "inspected_restaurants"
+                  },
+                  {
+                    "fieldName": "inspections_with_04k"
+                  },
+                  {
+                    "fieldName": "complaint_percentile"
+                  },
+                  {
+                    "fieldName": "inspection_evidence_percentile"
+                  },
+                  {
+                    "fieldName": "potential_underreporting_score"
+                  },
+                  {
+                    "fieldName": "interpretation"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "zipcode_filter",
+            "queries": [
+              {
+                "name": "dashboards/01f1b469994315539a0950b6473ff6aa/datasets/01f1b469dd451521a2c40a892b2c0f2c_zipcode",
+                "query": {
+                  "datasetName": "final_tables",
+                  "fields": [
+                    {
+                      "name": "zipcode",
+                      "expression": "`zipcode`"
+                    },
+                    {
+                      "name": "zipcode_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Select ZIP Code"
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "zipcode",
+                    "queryName": "dashboards/01f1b469994315539a0950b6473ff6aa/datasets/01f1b469dd451521a2c40a892b2c0f2c_zipcode"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "resolution_map",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "final_tables",
+                  "fields": [
+                    {
+                      "name": "avg(avg_percent_unresolved_within_30_days)",
+                      "expression": "AVG(`avg_percent_unresolved_within_30_days`)"
+                    },
+                    {
+                      "name": "zipcode",
+                      "expression": "`zipcode`"
+                    },
+                    {
+                      "name": "avg(total_rat_sightings)",
+                      "expression": "AVG(`total_rat_sightings`)"
+                    },
+                    {
+                      "name": "interpretation",
+                      "expression": "`interpretation`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Average % Unresolved Within 30 Days by ZIP Code",
+                  "fields": []
+                }
+              },
+              "version": 1,
+              "widgetType": "choropleth-map",
+              "encodings": {
+                "color": {
+                  "fieldName": "avg(avg_percent_unresolved_within_30_days)",
+                  "format": {
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "exact"
+                    },
+                    "type": "number-plain"
+                  },
+                  "formatTemplate": "{{ @formatted }}%",
+                  "displayName": "Avg % Unresolved (30d)",
+                  "scale": {
+                    "colorRamp": {
+                      "colors": {
+                        "end": "#99000D",
+                        "start": "#FFF5F0"
+                      },
+                      "mode": "custom-sequential"
+                    },
+                    "domain": {
+                      "max": 10,
+                      "min": 0,
+                      "type": "custom"
+                    },
+                    "fn": {
+                      "type": "symlog"
+                    },
+                    "type": "quantitative"
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "zipcode",
+                    "displayName": "ZIP Code"
+                  },
+                  {
+                    "fieldName": "avg(total_rat_sightings)",
+                    "displayName": "Total Rat Sightings"
+                  },
+                  {
+                    "fieldName": "interpretation",
+                    "displayName": "Interpretation"
+                  }
+                ],
+                "region": {
+                  "regionType": "mapbox-v4-postal-us",
+                  "key": {
+                    "fieldName": "zipcode",
+                    "geographicRole": "postal-4-unit-code",
+                    "type": "field"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 26,
+            "width": 12,
+            "height": 16
+          }
+        },
+        {
+          "widget": {
+            "name": "severity_triangles",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "final_coords",
+                  "fields": [
+                    {
+                      "name": "severity_score",
+                      "expression": "`severity_score`"
+                    },
+                    {
+                      "name": "avg_lat",
+                      "expression": "`avg_lat`"
+                    },
+                    {
+                      "name": "avg_lng",
+                      "expression": "`avg_lng`"
+                    },
+                    {
+                      "name": "zipcode",
+                      "expression": "`zipcode`"
+                    },
+                    {
+                      "name": "interpretation",
+                      "expression": "`interpretation`"
+                    },
+                    {
+                      "name": "underreporting_score",
+                      "expression": "`underreporting_score`"
+                    },
+                    {
+                      "name": "avg_pct_unresolved",
+                      "expression": "`avg_pct_unresolved`"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`interpretation` IN ('Reporting exceeds restaurant evidence', 'Moderate potential under-reporting signal', 'High potential under-reporting signal')"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Underreporting Severity — Golden Triangles"
+              },
+              "version": 2,
+              "mark": {
+                "shape": "triangle-up"
+              },
+              "widgetType": "symbol-map",
+              "encodings": {
+                "coordinates": {
+                  "latitude": {
+                    "fieldName": "avg_lat"
+                  },
+                  "longitude": {
+                    "fieldName": "avg_lng"
+                  }
+                },
+                "color": {
+                  "fieldName": "severity_score",
+                  "displayName": "Severity Score",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "custom-sequential",
+                      "colors": {
+                        "start": "#FFFBE6",
+                        "end": "#453406"
+                      }
+                    },
+                    "fn": {
+                      "type": "symlog"
+                    }
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "zipcode",
+                    "displayName": "ZIP Code"
+                  },
+                  {
+                    "fieldName": "interpretation",
+                    "displayName": "Interpretation"
+                  },
+                  {
+                    "fieldName": "underreporting_score",
+                    "displayName": "Underreporting Score"
+                  },
+                  {
+                    "fieldName": "avg_pct_unresolved",
+                    "displayName": "Avg % Unresolved (30d)"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 12,
+            "height": 16
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
