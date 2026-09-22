@@ -1,0 +1,17 @@
+# Databricks
+.databricks/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
