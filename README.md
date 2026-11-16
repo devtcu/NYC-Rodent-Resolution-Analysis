@@ -1,6 +1,6 @@
 # NYC Rodent Resolution Analysis
 
-<img width="1438" height="998" alt="Databricks_1" src="https://github.com/user-attachments/assets/48871f30-b36a-41f9-a2dd-66ec80a2274d" />
+<img height="450" alt="Databricks_1" src="https://github.com/user-attachments/assets/48871f30-b36a-41f9-a2dd-66ec80a2274d" />
 
 > A data-driven investigation into NYC's rodent problem — comparing resident complaints (311) with restaurant inspection evidence (DOH) to identify underreporting, measure resolution times, and visualize service gaps across ZIP codes.
 >
